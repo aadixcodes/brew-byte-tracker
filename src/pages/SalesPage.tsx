@@ -116,6 +116,12 @@ const SalesPage: React.FC = () => {
   const onSubmit = (data: SaleFormValues) => {
     addSale(data);
     setSales(getSales());
+    
+    // Update menu items list to include the new item if it doesn't exist
+    if (!menuItems.includes(data.item_name)) {
+      setMenuItems(prev => [...prev, data.item_name]);
+    }
+    
     form.reset();
     setIsAddDialogOpen(false);
   };
@@ -125,6 +131,12 @@ const SalesPage: React.FC = () => {
     if (selectedSale) {
       editSale(selectedSale.id, data);
       setSales(getSales());
+      
+      // Update menu items list to include the edited item if it doesn't exist
+      if (!menuItems.includes(data.item_name)) {
+        setMenuItems(prev => [...prev, data.item_name]);
+      }
+      
       editForm.reset();
       setIsEditDialogOpen(false);
       setSelectedSale(null);
@@ -160,7 +172,7 @@ const SalesPage: React.FC = () => {
       filteredData = filterSalesByDate(dateRange.from || null, dateRange.to || null);
     }
     
-    if (itemFilter) {
+    if (itemFilter && itemFilter !== "all") {
       filteredData = filteredData.filter(sale => 
         sale.item_name === itemFilter
       );
@@ -217,21 +229,11 @@ const SalesPage: React.FC = () => {
                 <div className="grid gap-4 py-4">
                   <div className="space-y-2">
                     <Label htmlFor="item_name">Item Name</Label>
-                    <Select 
-                      onValueChange={(value) => form.setValue("item_name", value)}
-                      defaultValue={form.getValues("item_name")}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select item" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {menuItems.map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {item}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      id="item_name"
+                      placeholder="Enter item name"
+                      {...form.register("item_name")}
+                    />
                     {form.formState.errors.item_name && (
                       <p className="text-sm text-destructive">{form.formState.errors.item_name.message}</p>
                     )}
@@ -251,7 +253,7 @@ const SalesPage: React.FC = () => {
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="sale_price_per_item">Sale Price Per Item ($)</Label>
+                      <Label htmlFor="sale_price_per_item">Sale Price Per Item (₹)</Label>
                       <Input
                         id="sale_price_per_item"
                         type="number"
@@ -264,7 +266,7 @@ const SalesPage: React.FC = () => {
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="cost_price">Cost Price Per Item ($)</Label>
+                      <Label htmlFor="cost_price">Cost Price Per Item (₹)</Label>
                       <Input
                         id="cost_price"
                         type="number"
@@ -306,7 +308,7 @@ const SalesPage: React.FC = () => {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${totalSales.toFixed(2)}</div>
+              <div className="text-2xl font-bold">₹{totalSales.toFixed(2)}</div>
               <p className="text-xs text-muted-foreground">
                 From {sales.length} sales
               </p>
@@ -319,7 +321,7 @@ const SalesPage: React.FC = () => {
               <DollarSign className="h-4 w-4 text-emerald-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-emerald-500">${totalProfit.toFixed(2)}</div>
+              <div className="text-2xl font-bold text-emerald-500">₹{totalProfit.toFixed(2)}</div>
               <p className="text-xs text-muted-foreground">
                 Profit margin: {(totalSales > 0 ? (totalProfit / totalSales) * 100 : 0).toFixed(2)}%
               </p>
@@ -428,7 +430,7 @@ const SalesPage: React.FC = () => {
           <CardHeader>
             <CardTitle>Sales Records</CardTitle>
             <CardDescription>
-              Showing {sales.length} sales with a total value of ${totalSales.toFixed(2)}
+              Showing {sales.length} sales with a total value of ₹{totalSales.toFixed(2)}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -454,10 +456,10 @@ const SalesPage: React.FC = () => {
                       <td className="p-2">{sale.date}</td>
                       <td className="p-2">{sale.item_name}</td>
                       <td className="text-right p-2">{sale.quantity}</td>
-                      <td className="text-right p-2">${sale.sale_price_per_item.toFixed(2)}</td>
-                      <td className="text-right p-2">${sale.cost_price.toFixed(2)}</td>
-                      <td className="text-right p-2">${sale.total_sale.toFixed(2)}</td>
-                      <td className="text-right p-2 text-emerald-500">${sale.profit.toFixed(2)}</td>
+                      <td className="text-right p-2">₹{sale.sale_price_per_item.toFixed(2)}</td>
+                      <td className="text-right p-2">₹{sale.cost_price.toFixed(2)}</td>
+                      <td className="text-right p-2">₹{sale.total_sale.toFixed(2)}</td>
+                      <td className="text-right p-2 text-emerald-500">₹{sale.profit.toFixed(2)}</td>
                       <td className="p-2">
                         <div className="flex justify-center gap-2">
                           <Button
@@ -501,21 +503,11 @@ const SalesPage: React.FC = () => {
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
                 <Label htmlFor="edit_item_name">Item Name</Label>
-                <Select 
-                  onValueChange={(value) => editForm.setValue("item_name", value)}
-                  defaultValue={editForm.getValues("item_name")}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select item" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {menuItems.map((item) => (
-                      <SelectItem key={item} value={item}>
-                        {item}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="edit_item_name"
+                  placeholder="Enter item name"
+                  {...editForm.register("item_name")}
+                />
                 {editForm.formState.errors.item_name && (
                   <p className="text-sm text-destructive">{editForm.formState.errors.item_name.message}</p>
                 )}
@@ -535,7 +527,7 @@ const SalesPage: React.FC = () => {
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit_sale_price_per_item">Sale Price Per Item ($)</Label>
+                  <Label htmlFor="edit_sale_price_per_item">Sale Price Per Item (₹)</Label>
                   <Input
                     id="edit_sale_price_per_item"
                     type="number"
@@ -548,7 +540,7 @@ const SalesPage: React.FC = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="edit_cost_price">Cost Price Per Item ($)</Label>
+                  <Label htmlFor="edit_cost_price">Cost Price Per Item (₹)</Label>
                   <Input
                     id="edit_cost_price"
                     type="number"

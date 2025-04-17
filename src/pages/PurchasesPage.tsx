@@ -113,6 +113,12 @@ const PurchasesPage: React.FC = () => {
   const onSubmit = (data: PurchaseFormValues) => {
     addPurchase(data);
     setPurchases(getPurchases());
+
+    // Update inventory items list to include the new item if it doesn't exist
+    if (!inventoryItems.includes(data.item_name)) {
+      setInventoryItems(prev => [...prev, data.item_name]);
+    }
+    
     form.reset();
     setIsAddDialogOpen(false);
   };
@@ -122,6 +128,12 @@ const PurchasesPage: React.FC = () => {
     if (selectedPurchase) {
       editPurchase(selectedPurchase.id, data);
       setPurchases(getPurchases());
+      
+      // Update inventory items list to include the edited item if it doesn't exist
+      if (!inventoryItems.includes(data.item_name)) {
+        setInventoryItems(prev => [...prev, data.item_name]);
+      }
+      
       editForm.reset();
       setIsEditDialogOpen(false);
       setSelectedPurchase(null);
@@ -156,7 +168,7 @@ const PurchasesPage: React.FC = () => {
       filteredData = filterPurchasesByDate(dateRange.from || null, dateRange.to || null);
     }
     
-    if (itemFilter) {
+    if (itemFilter && itemFilter !== "all") {
       filteredData = filteredData.filter(purchase => 
         purchase.item_name === itemFilter
       );
@@ -212,21 +224,11 @@ const PurchasesPage: React.FC = () => {
                 <div className="grid gap-4 py-4">
                   <div className="space-y-2">
                     <Label htmlFor="item_name">Item Name</Label>
-                    <Select 
-                      onValueChange={(value) => form.setValue("item_name", value)}
-                      defaultValue={form.getValues("item_name")}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select item" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {inventoryItems.map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {item}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      id="item_name"
+                      placeholder="Enter item name"
+                      {...form.register("item_name")}
+                    />
                     {form.formState.errors.item_name && (
                       <p className="text-sm text-destructive">{form.formState.errors.item_name.message}</p>
                     )}
@@ -246,7 +248,7 @@ const PurchasesPage: React.FC = () => {
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="price_per_item">Price Per Item ($)</Label>
+                      <Label htmlFor="price_per_item">Price Per Item (₹)</Label>
                       <Input
                         id="price_per_item"
                         type="number"
@@ -381,7 +383,7 @@ const PurchasesPage: React.FC = () => {
           <CardHeader>
             <CardTitle>Purchase Records</CardTitle>
             <CardDescription>
-              Showing {purchases.length} purchases with a total value of ${totalAmount.toFixed(2)}
+              Showing {purchases.length} purchases with a total value of ₹{totalAmount.toFixed(2)}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -405,8 +407,8 @@ const PurchasesPage: React.FC = () => {
                       <td className="p-2">{purchase.date}</td>
                       <td className="p-2">{purchase.item_name}</td>
                       <td className="text-right p-2">{purchase.quantity}</td>
-                      <td className="text-right p-2">${purchase.price_per_item.toFixed(2)}</td>
-                      <td className="text-right p-2">${purchase.total.toFixed(2)}</td>
+                      <td className="text-right p-2">₹{purchase.price_per_item.toFixed(2)}</td>
+                      <td className="text-right p-2">₹{purchase.total.toFixed(2)}</td>
                       <td className="p-2">
                         <div className="flex justify-center gap-2">
                           <Button
@@ -450,21 +452,11 @@ const PurchasesPage: React.FC = () => {
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
                 <Label htmlFor="edit_item_name">Item Name</Label>
-                <Select 
-                  onValueChange={(value) => editForm.setValue("item_name", value)}
-                  defaultValue={editForm.getValues("item_name")}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select item" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {inventoryItems.map((item) => (
-                      <SelectItem key={item} value={item}>
-                        {item}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="edit_item_name"
+                  placeholder="Enter item name"
+                  {...editForm.register("item_name")}
+                />
                 {editForm.formState.errors.item_name && (
                   <p className="text-sm text-destructive">{editForm.formState.errors.item_name.message}</p>
                 )}
@@ -484,7 +476,7 @@ const PurchasesPage: React.FC = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="edit_price_per_item">Price Per Item ($)</Label>
+                  <Label htmlFor="edit_price_per_item">Price Per Item (₹)</Label>
                   <Input
                     id="edit_price_per_item"
                     type="number"

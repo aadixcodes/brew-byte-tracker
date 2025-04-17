@@ -16,7 +16,7 @@ const Header: React.FC<HeaderProps> = ({ toggleMobileSidebar }) => {
   const { user, logout } = useAuth();
   
   return (
-    <header className="h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 w-full">
       <div className="flex h-16 items-center px-4 sm:px-6">
         <Button variant="ghost" size="icon" className="md:hidden mr-2" onClick={toggleMobileSidebar}>
           <Menu className="h-5 w-5" />
