@@ -187,6 +187,11 @@ const SalesPage: React.FC = () => {
   const totalSales = sales.reduce((acc, sale) => acc + sale.total_sale, 0);
   const totalProfit = sales.reduce((acc, sale) => acc + sale.profit, 0);
 
+  // Handler for date range selection
+  const handleDateRangeSelect = (range: { from: Date | undefined; to: Date | undefined }) => {
+    setDateRange(range);
+  };
+
   return (
     <Layout>
       <div className="flex flex-col space-y-6">
@@ -362,7 +367,7 @@ const SalesPage: React.FC = () => {
                       mode="range"
                       defaultMonth={new Date()}
                       selected={dateRange}
-                      onSelect={setDateRange}
+                      onSelect={handleDateRangeSelect}
                       numberOfMonths={2}
                       className="pointer-events-auto"
                     />
@@ -380,7 +385,7 @@ const SalesPage: React.FC = () => {
                     <SelectValue placeholder="Filter by item" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Items</SelectItem>
+                    <SelectItem key="all-items" value="all">All Items</SelectItem>
                     {menuItems.map((item) => (
                       <SelectItem key={item} value={item}>
                         {item}
